@@ -30,12 +30,12 @@
     <img src ="assets/img4.png" id="img4"></img>
     <img src ="assets/img5.png" id="img5"></img>
     <img src ="assets/img6.png" id="img6"></img>
-    <video id="video"  width="480" height="360" preload autoplay loop muted></video>
+    <video  id="video"  width="480" height="360" preload autoplay loop muted></video>
     <canvas id="canvas" width="480" height="360"></canvas>
 
     <script>
         var mode = true;
-        var firstMask = 0;
+        var mask = 0;
         var numMasks = 7;
 
         switchMode = function() {
@@ -43,13 +43,8 @@
         }
         
         switchMasks = function() {
-            firstMask = (firstMask+1)%numMasks;
+            mask = (mask+1)%numMasks;
         }
-		
-		sortRects = function(rect1, rect2) {
-			var val = 0;
-			val = (rect1.x < rect2.x)? -1:1
-		}
 
         window.onload = function() {
             
@@ -68,10 +63,8 @@
                 context.clearRect(0,0,canvas.width, canvas.height);
                 
                 if(!event.data) return;
-                var counter = firstMask;
-				event.data.faces.sort(sortRects);
                 
-                event.data.faces.forEach(function(rect, index, arr) {
+                event.data.faces.forEach(function(rect) {
                     if(mode){
                         context.strokeStyle = '#a64ceb';
                         context.strokeRect(rect.x, rect.y, rect.width, rect.height);
@@ -80,7 +73,7 @@
                         context.fillText('x: ' + rect.x + 'px', rect.x + rect.width + 5, rect.y + 11);
                         context.fillText('y: ' + rect.y + 'px', rect.x + rect.width + 5, rect.y + 22);
                     } else {
-                        switch(counter){
+                        switch(mask){
                             case 0:
                                 var img = document.getElementById("img0");
                                 context.drawImage(img, rect.x - rect.width*0.09, rect.y - rect.height*0.1, rect.width*1.2, rect.height*1.2);
@@ -90,12 +83,10 @@
                                 context.drawImage(img, rect.x - rect.width*0.45, rect.y - rect.height*0.35, rect.width*1.6, rect.height*1.6);
                             break;
                             default:
-                                var img = document.getElementById("img" + counter);
+                                var img = document.getElementById("img" + mask);
                                 context.drawImage(img, rect.x, rect.y, rect.width, rect.height);
                             break;
                         }
-                        counter = (counter + 1)%numMasks;
-						event.data.faces.length;
                     }
                });
             });
