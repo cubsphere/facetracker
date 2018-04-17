@@ -1,0 +1,106 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    
+    <script src="./js/tracking.js"></script>
+    <script src="./js/face-min.js"></script>
+    <script src="./js/Landmarks.js"></script>
+    <script src="./js/Regressor.js"></script>
+    
+    <style>
+        video, canvas {
+            margin-left: 50px;
+            margin-top: 50px;
+            position: absolute;
+            border: 2px solid #111111;
+        }
+        img {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <button onclick="switchMode()"  style="margin-top: 415px; position:absolute; margin-left: 49px;" >switch mode</button>
+    <button onclick="switchMasks()" style="margin-top: 415px; position:absolute; margin-left: 144px;">switch masks</button>
+    <img src ="assets/img0.png" id="img0"></img>
+    <img src ="assets/img1.png" id="img1"></img>
+    <img src ="assets/img2.png" id="img2"></img>
+    <img src ="assets/img3.png" id="img3"></img>
+    <img src ="assets/img4.png" id="img4"></img>
+    <img src ="assets/img5.png" id="img5"></img>
+    <img src ="assets/img6.png" id="img6"></img>
+    <video id="video"  width="480" height="360" preload autoplay loop muted></video>
+    <canvas id="canvas" width="480" height="360"></canvas>
+
+    <script>
+        var mode = true;
+        var firstMask = 0;
+        var numMasks = 7;
+
+        switchMode = function() {
+            mode = !mode;
+        }
+        
+        switchMasks = function() {
+            firstMask = (firstMask+1)%numMasks;
+        }
+		
+		sortRects = function(rect1, rect2) {
+			var val = 0;
+			val = (rect1.x < rect2.x)? -1:1
+		}
+
+        window.onload = function() {
+            
+            var video = document.getElementById('video');
+            var canvas = document.getElementById('canvas');
+            var context = canvas.getContext('2d');
+            
+            var tracker = new tracking.LandmarksTracker();
+            tracker.setInitialScale(4);
+            tracker.setStepSize(2);
+            tracker.setEdgesDensity(0.1);
+            
+            tracking.track('#video', tracker, { camera: true });
+            
+            tracker.on('track', function(event) {
+                context.clearRect(0,0,canvas.width, canvas.height);
+                
+                if(!event.data) return;
+                var counter = firstMask;
+				event.data.faces.sort(sortRects);
+                
+                event.data.faces.forEach(function(rect, index, arr) {
+                    if(mode){
+                        context.strokeStyle = '#a64ceb';
+                        context.strokeRect(rect.x, rect.y, rect.width, rect.height);
+                        context.font = '11px Helvetica';
+                        context.fillStyle = "#fff";
+                        context.fillText('x: ' + rect.x + 'px', rect.x + rect.width + 5, rect.y + 11);
+                        context.fillText('y: ' + rect.y + 'px', rect.x + rect.width + 5, rect.y + 22);
+                    } else {
+                        switch(counter){
+                            case 0:
+                                var img = document.getElementById("img0");
+                                context.drawImage(img, rect.x - rect.width*0.09, rect.y - rect.height*0.1, rect.width*1.2, rect.height*1.2);
+                            break;
+                            case 6:
+                                var img = document.getElementById("img6");
+                                context.drawImage(img, rect.x - rect.width*0.45, rect.y - rect.height*0.35, rect.width*1.6, rect.height*1.6);
+                            break;
+                            default:
+                                var img = document.getElementById("img" + counter);
+                                context.drawImage(img, rect.x, rect.y, rect.width, rect.height);
+                            break;
+                        }
+                        counter = (counter + 1)%numMasks;
+						event.data.faces.length;
+                    }
+               });
+            });
+        };
+    </script>
+
+</body>
+</html>
